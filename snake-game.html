@@ -25,10 +25,29 @@
       font-size: 18px;
       font-weight: bold;
     }
+    .score {
+      position: absolute;
+      top: 60px;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .game-over {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: red;
+      font-size: 36px;
+      font-weight: bold;
+      display: none;
+    }
   </style>
 </head>
 <body>
   <div class="info">Press Space to Start/Restart. Use 'W', 'A', 'S', 'D' to move the snake.</div>
+  <div class="score">Score: 0</div>
+  <div class="game-over">Game Over! Press Space to Restart.</div>
   <canvas id="gameCanvas" width="800" height="600"></canvas>
 
   <script>
@@ -39,7 +58,8 @@
     const rows = canvas.height / gridSize;
     const cols = canvas.width / gridSize;
 
-    let snake, direction, food, gameInterval;
+    let snake, direction, food, gameInterval, score;
+    let gameSpeed = 100; // Base speed
     const directions = {
       'w': { x: 0, y: -1 },
       's': { x: 0, y: 1 },
@@ -47,10 +67,17 @@
       'd': { x: 1, y: 0 }
     };
 
+    const scoreElement = document.querySelector('.score');
+    const gameOverElement = document.querySelector('.game-over');
+
     function resetGame() {
       snake = [{ x: Math.floor(cols / 2), y: Math.floor(rows / 2) }];
       direction = randomDirection();
       generateFood();
+      score = 0;
+      scoreElement.textContent = "Score: 0";
+      gameSpeed = 100;
+      gameOverElement.style.display = 'none';
     }
 
     function randomDirection() {
@@ -84,16 +111,26 @@
       if (head.x < 0 || head.y < 0 || head.x >= cols || head.y >= rows || snake.some(s => s.x === head.x && s.y === head.y)) {
         clearInterval(gameInterval);
         gameInterval = null; // Reset the game interval to null for restart
-        alert("Game Over! Press Space to Restart.");
+        gameOverElement.style.display = 'block';
         return;
       }
 
       snake.unshift(head);
       if (head.x === food.x && head.y === food.y) {
         generateFood(); // Eat the food
+        score++;
+        scoreElement.textContent = "Score: " + score;
+        // Increase snake speed after eating food
+        increaseSpeed();
       } else {
         snake.pop(); // Remove the tail
       }
+    }
+
+    function increaseSpeed() {
+      gameSpeed = Math.max(50, gameSpeed - 5); // Reduce interval time (max speed is capped)
+      clearInterval(gameInterval);
+      gameInterval = setInterval(gameLoop, gameSpeed);
     }
 
     function gameLoop() {
@@ -106,7 +143,7 @@
     document.addEventListener("keydown", function (e) {
       if (e.key === " " && !gameInterval) {
         resetGame();
-        gameInterval = setInterval(gameLoop, 100);
+        gameInterval = setInterval(gameLoop, gameSpeed);
       }
 
       if (directions[e.key]) {
