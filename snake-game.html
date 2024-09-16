@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neaj's Snake Game</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #222;
+    }
+    canvas {
+      border: 2px solid #fff;
+      background-color: #333;
+    }
+    .info {
+      position: absolute;
+      top: 20px;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="info">Press Space to Start/Restart. Use 'W', 'A', 'S', 'D' to move the snake.</div>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const gridSize = 20; // Size of each square in the grid
+    const rows = canvas.height / gridSize;
+    const cols = canvas.width / gridSize;
+
+    let snake, direction, food, gameInterval;
+    const directions = {
+      'w': { x: 0, y: -1 },
+      's': { x: 0, y: 1 },
+      'a': { x: -1, y: 0 },
+      'd': { x: 1, y: 0 }
+    };
+
+    function resetGame() {
+      snake = [{ x: Math.floor(cols / 2), y: Math.floor(rows / 2) }];
+      direction = randomDirection();
+      generateFood();
+    }
+
+    function randomDirection() {
+      const keys = Object.keys(directions);
+      return directions[keys[Math.floor(Math.random() * keys.length)]];
+    }
+
+    function generateFood() {
+      food = {
+        x: Math.floor(Math.random() * cols),
+        y: Math.floor(Math.random() * rows)
+      };
+    }
+
+    function drawSnake() {
+      ctx.fillStyle = "#0f0";
+      snake.forEach(part => {
+        ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize, gridSize);
+      });
+    }
+
+    function drawFood() {
+      ctx.fillStyle = "#f00";
+      ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+    }
+
+    function moveSnake() {
+      const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+
+      // Check if snake hits the wall or itself
+      if (head.x < 0 || head.y < 0 || head.x >= cols || head.y >= rows || snake.some(s => s.x === head.x && s.y === head.y)) {
+        clearInterval(gameInterval);
+        gameInterval = null; // Reset the game interval to null for restart
+        alert("Game Over! Press Space to Restart.");
+        return;
+      }
+
+      snake.unshift(head);
+      if (head.x === food.x && head.y === food.y) {
+        generateFood(); // Eat the food
+      } else {
+        snake.pop(); // Remove the tail
+      }
+    }
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      moveSnake();
+      drawFood();
+      drawSnake();
+    }
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === " " && !gameInterval) {
+        resetGame();
+        gameInterval = setInterval(gameLoop, 100);
+      }
+
+      if (directions[e.key]) {
+        direction = directions[e.key];
+      }
+    });
+
+    // Initial Setup
+    ctx.fillStyle = "#fff";
+    ctx.fillText("Press Space to Start", canvas.width / 2 - 70, canvas.height / 2);
+  </script>
+</body>
+</html>
