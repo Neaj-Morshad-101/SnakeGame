@@ -13,14 +13,15 @@ class Controls {
             LEFT: { x: -1, y: 0 },
             RIGHT: { x: 1, y: 0 }
         };
-        this.init();
+        this.setupEventListeners();
     }
 
-    init() {
-        document.addEventListener("keydown", (e) => {
+    setupEventListeners() {
+        document.addEventListener('keydown', (e) => {
             for (const [dirName, keys] of Object.entries(this.KEY_MAPPINGS)) {
                 if (keys.includes(e.key)) {
-                    this.snake.setDirection(this.DIRECTIONS[dirName]);
+                    const newDir = this.DIRECTIONS[dirName];
+                    this.snake.setDirection(newDir);
                     break;
                 }
             }

@@ -7,64 +7,55 @@ class Food {
         this.isBonus = false;
         this.bonusTimer = null;
         this.bonusSpawnTimer = null;
-        this.bonusCollected = 0;
         this.bonusAnimationFrame = 0;
         this.initBonusSpawnTimer();
     }
 
     getRandomPosition() {
+        const cols = Math.floor(this.canvasWidth / this.gridSize);
+        const rows = Math.floor(this.canvasHeight / this.gridSize);
         return {
-            x: Math.floor(Math.random() * (this.canvasWidth / this.gridSize)),
-            y: Math.floor(Math.random() * (this.canvasHeight / this.gridSize))
+            x: Math.floor(Math.random() * cols),
+            y: Math.floor(Math.random() * rows)
         };
     }
 
+    spawn(snake) {
+        let newPosition;
+        do {
+            newPosition = this.getRandomPosition();
+        } while (snake.body.some(segment => 
+            segment.x === newPosition.x && segment.y === newPosition.y
+        ));
+        this.position = newPosition;
+    }
+
     initBonusSpawnTimer() {
+        // Clear any existing timer
         if (this.bonusSpawnTimer) {
             clearInterval(this.bonusSpawnTimer);
         }
+        
+        // Set up new timer to check every 10 seconds
         this.bonusSpawnTimer = setInterval(() => {
-            if (!this.isBonus && Math.random() < 0.2) { // 20% chance every 10 seconds
-                this.spawnBonus();
+            if (!this.isBonus) {
+                console.log("Checking bonus spawn chance...");
+                if (Math.random() < 0.5) { // 50% chance
+                    console.log("Spawning bonus food!");
+                    this.isBonus = true;
+                    
+                    // Set timer to remove bonus food after 5 seconds
+                    if (this.bonusTimer) {
+                        clearTimeout(this.bonusTimer);
+                    }
+                    this.bonusTimer = setTimeout(() => {
+                        console.log("Removing bonus food");
+                        this.isBonus = false;
+                        this.spawn(snake);
+                    }, 5000);
+                }
             }
         }, 10000);
-    }
-
-    spawn(snake) {
-        let newPos;
-        do {
-            newPos = this.getRandomPosition();
-        } while (snake.collidesWith(newPos));
-        
-        this.position = newPos;
-        this.isBonus = false;
-        if (this.bonusTimer) {
-            clearTimeout(this.bonusTimer);
-            this.bonusTimer = null;
-        }
-    }
-
-    spawnBonus(snake) {
-        this.isBonus = true;
-        this.spawn(snake);
-        
-        if (this.bonusTimer) {
-            clearTimeout(this.bonusTimer);
-        }
-        
-        this.bonusTimer = setTimeout(() => {
-            this.isBonus = false;
-            this.spawn(snake);
-        }, 5000);
-
-        this.bonusCollected++;
-        
-        if (this.bonusCollected === 1) {
-            achievements.updateAchievement('firstBonus');
-        }
-        if (this.bonusCollected >= 3) {
-            achievements.updateAchievement('bonusStreak');
-        }
     }
 
     draw(ctx) {
@@ -76,49 +67,47 @@ class Food {
             this.bonusAnimationFrame = (this.bonusAnimationFrame + 0.1) % (Math.PI * 2);
             const scale = 1 + Math.sin(this.bonusAnimationFrame) * 0.2;
             
-            // Glow effect
             ctx.shadowColor = '#ffd700';
             ctx.shadowBlur = 15;
             
-            // Gradient for bonus food
             const gradient = ctx.createRadialGradient(x, y, 0, x, y, this.gridSize/2 * scale);
             gradient.addColorStop(0, '#fff7cc');
             gradient.addColorStop(0.5, '#ffd700');
             gradient.addColorStop(1, '#ffcc00');
             
             ctx.fillStyle = gradient;
+            
+            ctx.beginPath();
+            ctx.arc(x, y, this.gridSize/2 * scale, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Add sparkle effect
+            ctx.fillStyle = "#fff";
+            const time = Date.now() / 200;
+            for (let i = 0; i < 4; i++) {
+                const angle = (time + i * Math.PI/2) % (Math.PI * 2);
+                ctx.beginPath();
+                ctx.arc(
+                    x + Math.cos(angle) * this.gridSize/3,
+                    y + Math.sin(angle) * this.gridSize/3,
+                    2,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
+            }
         } else {
             // Regular food
             ctx.shadowColor = '#ffffff';
             ctx.shadowBlur = 10;
-            ctx.fillStyle = '#ffffff';
+            ctx.fillStyle = '#ff0000';
+            
+            ctx.beginPath();
+            ctx.arc(x, y, this.gridSize/2, 0, Math.PI * 2);
+            ctx.fill();
         }
-
-        ctx.beginPath();
-        ctx.arc(x, y, this.gridSize/2 * (this.isBonus ? 1 + Math.sin(this.bonusAnimationFrame) * 0.2 : 1), 0, Math.PI * 2);
-        ctx.fill();
         
-        // Reset shadow
         ctx.shadowColor = 'transparent';
         ctx.shadowBlur = 0;
-    }
-
-    cleanup() {
-        if (this.bonusTimer) {
-            clearTimeout(this.bonusTimer);
-            this.bonusTimer = null;
-        }
-        if (this.bonusSpawnTimer) {
-            clearInterval(this.bonusSpawnTimer);
-            this.bonusSpawnTimer = null;
-        }
-    }
-
-    reset() {
-        this.cleanup();
-        this.bonusCollected = 0;
-        this.isBonus = false;
-        this.bonusAnimationFrame = 0;
-        this.initBonusSpawnTimer();
     }
 } 

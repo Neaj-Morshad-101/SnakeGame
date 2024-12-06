@@ -11,20 +11,16 @@ class SoundManager {
     }
 
     init() {
-        // Initialize all sounds
         Object.values(this.sounds).forEach(sound => {
             if (sound) {
                 sound.volume = this.volume;
-                // Preload sounds
                 sound.load();
-                // Add error handling
-                sound.onerror = (e) => {
-                    console.error('Error loading sound:', e);
+                sound.onerror = () => {
+                    console.warn('Sound loading failed, continuing without sound');
                 };
             }
         });
 
-        // Restore mute state from localStorage if exists
         const savedMuteState = localStorage.getItem('snakeSoundMuted');
         if (savedMuteState !== null) {
             this.isMuted = JSON.parse(savedMuteState);
@@ -34,19 +30,14 @@ class SoundManager {
 
     play(soundName) {
         const sound = this.sounds[soundName];
-        if (!this.isMuted && sound) {
-            // Create a promise to handle sound playing
-            const playPromise = sound.play();
-            
-            if (playPromise !== undefined) {
-                playPromise
-                    .then(() => {
-                        // Reset sound to start
-                        sound.currentTime = 0;
-                    })
-                    .catch(error => {
-                        console.warn('Sound play failed:', error);
-                    });
+        if (!this.isMuted && sound && sound.readyState >= 2) {
+            try {
+                sound.currentTime = 0;
+                sound.play().catch(err => {
+                    console.warn('Sound play failed:', err);
+                });
+            } catch (err) {
+                console.warn('Sound play error:', err);
             }
         }
     }
@@ -100,6 +91,3 @@ class SoundManager {
         this.init();
     }
 }
-
-// Create a single instance of SoundManager
-const soundManager = new SoundManager(); 

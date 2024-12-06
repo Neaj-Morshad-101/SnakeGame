@@ -4,19 +4,20 @@ const ctx = canvas.getContext('2d');
 const gridSize = 20;
 
 // Game state variables
-let gameInterval;
+let gameInterval = null;
 let isGameStarted = false;
 let isPaused = false;
 let score = 0;
 let highScore = localStorage.getItem('snakeHighScore') || 0;
-let gameSpeed = 100; // Initial speed
-const MIN_GAME_SPEED = 50; // Maximum speed (lower number = faster)
+let gameSpeed = 100;
+const MIN_GAME_SPEED = 50;
 
 // DOM elements
 const scoreElement = document.querySelector('.score');
 const highScoreElement = document.querySelector('.high-score');
 const gameOverElement = document.querySelector('.game-over');
 const pauseElement = document.querySelector('.pause-text');
+const startMessage = document.querySelector('.start-message');
 
 // Game objects
 const snake = new Snake(gridSize);
@@ -26,60 +27,50 @@ const particleSystem = new ParticleSystem();
 const soundManager = new SoundManager();
 const achievements = new Achievements();
 
-// Game loop
 function gameLoop() {
     if (isPaused) return;
-
+    
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+    
     snake.move();
-    if (snake.collidesWith(food.position)) {
+    
+    if (snake.checkCollision()) {
+        handleGameOver();
+        return;
+    }
+    
+    // Check food collision
+    if (snake.body[0].x === food.position.x && snake.body[0].y === food.position.y) {
         snake.grow();
         score += food.isBonus ? 5 : 1;
-        scoreElement.textContent = `Score: ${score}`;
+        updateScoreDisplay(score);
+        soundManager.play(food.isBonus ? 'bonus' : 'eat');
         
-        if (score > highScore) {
-            highScore = score;
-            localStorage.setItem('snakeHighScore', highScore);
-            highScoreElement.textContent = `High Score: ${highScore}`;
-            achievements.updateAchievement('highScoreBeaten');
-        }
+        particleSystem.createParticles(
+            food.position.x * gridSize + gridSize/2,
+            food.position.y * gridSize + gridSize/2,
+            food.isBonus ? "#ffd700" : "#ffff00"
+        );
         
+        food.spawn(snake);
+        increaseSpeed();
+        
+        // Achievement checks
         if (score >= 100) achievements.updateAchievement('score100');
         else if (score >= 50) achievements.updateAchievement('score50');
-
-        food.spawn(snake);
-        soundManager.play('eat');
-        particleSystem.createParticles(
-            food.position.x * gridSize + gridSize / 2,
-            food.position.y * gridSize + gridSize / 2,
-            '#ffffff'
-        );
-
-        // Increase speed
-        if (gameSpeed > MIN_GAME_SPEED) {
-            gameSpeed = Math.max(MIN_GAME_SPEED, gameSpeed - 2);
-            clearInterval(gameInterval);
-            gameInterval = setInterval(gameLoop, gameSpeed);
-        }
         
         if (gameSpeed <= MIN_GAME_SPEED) {
             achievements.updateAchievement('speedDemon');
         }
+    } else {
+        snake.body.pop();
     }
-
-    snake.draw(ctx);
+    
+    // Draw everything
     food.draw(ctx);
-    particleSystem.update();
-    particleSystem.draw(ctx);
-
-    // Check for game over
-    if (snake.collidesWith(snake.body[0])) {
-        handleGameOver();
-    }
+    snake.draw(ctx);
 }
 
-// Handle game over
 function handleGameOver() {
     clearInterval(gameInterval);
     gameInterval = null;
@@ -88,37 +79,36 @@ function handleGameOver() {
     isGameStarted = false;
 }
 
-// Reset game state
 function resetGame() {
-    snake.body = [{ x: 10, y: 10 }];
-    snake.direction = { x: 1, y: 0 };
+    snake.reset();
     food.spawn(snake);
-    gameOverElement.style.display = 'none';
-    pauseElement.style.display = 'none';
-    isPaused = false;
     score = 0;
+    gameSpeed = 100;
     scoreElement.textContent = `Score: ${score}`;
     highScoreElement.textContent = `High Score: ${highScore}`;
-    gameSpeed = 100;
+    gameOverElement.style.display = 'none';
+    startMessage.style.display = 'none';
+    pauseElement.style.display = 'none';
+    isPaused = false;
 }
 
 // Event listeners
-document.addEventListener("keydown", function (e) {
+document.addEventListener("keydown", function(e) {
     if (e.key === " ") {
+        e.preventDefault(); // Prevent page scrolling
         if (!isGameStarted) {
+            isGameStarted = true;
             resetGame();
             gameInterval = setInterval(gameLoop, gameSpeed);
-            isGameStarted = true;
         } else {
             isPaused = !isPaused;
             pauseElement.style.display = isPaused ? 'block' : 'none';
         }
-    } else if (e.key === 'M' || e.key === 'm') {
-        soundManager.toggleMute();
     }
 });
 
 // Initialize game
 window.addEventListener('load', () => {
     resetGame();
+    startMessage.style.display = 'block';
 }); 
