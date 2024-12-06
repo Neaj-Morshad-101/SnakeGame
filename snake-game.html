@@ -15,6 +15,32 @@
       justify-content: center;
       align-items: center;
     }
+
+    .start-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #ffffff;
+      font-size: 36px;
+      font-weight: bold;
+      text-align: center;
+      text-shadow: 
+        0 0 10px rgba(255, 255, 255, 0.3),
+        0 2px 4px rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.7);
+      padding: 20px 40px;
+      border-radius: 12px;
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.05); }
+      100% { transform: translate(-50%, -50%) scale(1); }
+    }
   
     /* Game container with flex layout */
     .game-container {
@@ -126,13 +152,198 @@
     .score.updated {
       animation: scoreUpdate 0.3s ease;
     }
+
+    .game-container {
+      display: flex;
+      gap: 30px;  /* Increased gap between info and game */
+      align-items: flex-start;
+      padding: 20px;
+      max-width: 1200px;  /* Maximum width to prevent stretching */
+      margin: 0 auto;
+    }
+
+    /* Game info panel */
+    .game-info {
+      flex: 0 0 300px;  /* Fixed width, won't shrink or grow */
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      position: sticky;  /* Optional: keeps info visible while scrolling */
+      top: 20px;
+    }
+
+    /* Game area */
+    .game-area {
+      flex: 0 0 auto;  /* Don't allow the game area to shrink */
+      position: relative;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1200px) {
+      .game-container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .game-info {
+        flex: 0 0 auto;
+        width: 100%;
+        max-width: 300px;
+        margin-bottom: 20px;
+      }
+    }
+    .info {
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      backdrop-filter: blur(5px);
+      min-width: 280px;
+    }
+
+    .info h2 {
+      margin: 0 0 20px 0;
+      color: #ffd700;
+      font-size: 24px;
+      text-align: center;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .controls-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .control-item {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 15px;
+    }
+
+    .control-label {
+      color: #ffd700;
+      font-size: 16px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .key-groups {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .key-set {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .key-row {
+      display: flex;
+      gap: 5px;
+    }
+
+    .key {
+      width: 35px;
+      height: 35px;
+      background: linear-gradient(145deg, #2a2a3a, #1a1a2a);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+      box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.2),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      transition: all 0.2s ease;
+    }
+
+    .key:hover {
+      transform: translateY(1px);
+      box-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.2),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      background: linear-gradient(145deg, #3a3a4a, #2a2a3a);
+    }
+
+    .key.long {
+      width: auto;
+      padding: 0 15px;
+    }
+
+    .or {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 14px;
+      margin: 0 5px;
+    }
+
+    .key-action {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+    }
+
+    /* Animation for keys when pressed */
+    .key:active {
+      transform: translateY(2px);
+      box-shadow: 
+        0 1px 1px rgba(0, 0, 0, 0.2),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    }
   </style>
 </head>
 <body>
 <div class="game-container">
   <!-- Left side - Game info -->
   <div class="game-info">
-    <div class="info">Press Space to Start/Restart. Use 'W', 'A', 'S', 'D' to move the snake.</div>
+    <div class="info">
+      <h2>Game Controls</h2>
+      <div class="controls-list">
+        <div class="control-item">
+          <div class="control-label">Movement:</div>
+          <div class="key-groups">
+            <div class="key-set">
+              <div class="key">W</div>
+              <div class="key-row">
+                <div class="key">A</div>
+                <div class="key">S</div>
+                <div class="key">D</div>
+              </div>
+            </div>
+            <span class="or">or</span>
+            <div class="key-set">
+              <div class="key">↑</div>
+              <div class="key-row">
+                <div class="key">←</div>
+                <div class="key">↓</div>
+                <div class="key">→</div>
+              </div>
+            </div>
+          </div>
+        </div>
+    
+        <div class="control-item">
+          <div class="control-label">Game Control:</div>
+          <div class="key-groups">
+            <div class="key long">Space</div>
+            <span class="key-action">Start / Pause / Resume</span>
+          </div>
+        </div>
+    
+        <div class="control-item">
+          <div class="control-label">Sound:</div>
+          <div class="key-groups">
+            <div class="key">M</div>
+            <span class="key-action">Mute / Unmute</span>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="score">Score: 0</div>
     <div class="high-score">High Score: 0</div>
   </div>
@@ -206,6 +417,10 @@
     let isPaused = false;
     let isGameStarted = false;
 
+    let isMuted = false;
+
+    let startMessage = null;
+
     function showAchievement(message) {
       achievementElement.textContent = message;
       achievementElement.style.opacity = '1';
@@ -252,6 +467,10 @@
       Object.keys(achievements).forEach(key => {
         achievements[key] = false;
       });
+
+      if (!isGameStarted) {
+        showStartMessage();
+      }
     }
 
     function randomDirection() {
@@ -290,15 +509,14 @@
     }
 
     function playSound(soundName) {
-        try {
-            if (!sounds[soundName]) {
-                throw new Error(`Sound ${soundName} not found`);
-            }
-            sounds[soundName].currentTime = 0;
-            return sounds[soundName].play();
-        } catch (error) {
-            console.error('Sound playback failed:', error);
-        }
+      console.log('Attempting to play sound:', soundName);
+      if (!isMuted && sounds[soundName]) {
+        console.log('Sound object:', sounds[soundName]);
+        sounds[soundName].currentTime = 0;
+        sounds[soundName].play()
+          .then(() => console.log('Sound played successfully'))
+          .catch(e => console.log('Sound play failed:', e));
+      }
     }
 
     function updateScoreDisplay(newScore) {
@@ -726,17 +944,45 @@
       drawParticles();
     }
 
-    let isMuted = false;
+    const KEY_MAPPINGS = {
+      UP: ['w', 'W', 'ArrowUp'],
+      DOWN: ['s', 'S', 'ArrowDown'],
+      LEFT: ['a', 'A', 'ArrowLeft'],
+      RIGHT: ['d', 'D', 'ArrowRight']
+    };
 
+    // Define directions
+    const DIRECTIONS = {
+      UP: { x: 0, y: -1 },
+      DOWN: { x: 0, y: 1 },
+      LEFT: { x: -1, y: 0 },
+      RIGHT: { x: 1, y: 0 }
+    };
+
+    function showStartMessage() {
+      // Remove existing message if any
+      removeStartMessage();
+      
+      // Create new message
+      startMessage = document.createElement('div');
+      startMessage.className = 'start-message';
+      startMessage.textContent = 'Press Space to Start';
+      document.querySelector('.game-area').appendChild(startMessage);
+    }
+
+    // Remove the message when game starts
+    function removeStartMessage() {
+      if (startMessage) {
+        startMessage.remove();
+        startMessage = null;
+      }
+    }
+
+    // Update your game start logic
     document.addEventListener("keydown", function (e) {
-      if (e.key === 'M' || e.key === 'm') {
-        isMuted = !isMuted;
-        Object.values(sounds).forEach(sound => {
-          sound.muted = isMuted;
-        });
-      } else if (e.key === " ") {
+      if (e.key === " ") {
         if (!isGameStarted || gameOverElement.style.display === 'block') {
-          // Start new game or restart after game over
+          removeStartMessage();
           resetGame();
           gameInterval = setInterval(gameLoop, gameSpeed);
           isGameStarted = true;
@@ -752,29 +998,44 @@
           }
         }
       }
-      // Store next direction if it's a valid move
-      if (!isPaused && isGameStarted && directions[e.key]) {
-        const newDir = directions[e.key];
-        
-        // Prevent 180-degree turns
-        if (direction && nextDirection) {
-          // Use nextDirection if it exists, otherwise use current direction
-          const currentDir = nextDirection || direction;
-          if (!(newDir.x === -currentDir.x && newDir.y === -currentDir.y)) {
-            nextDirection = newDir;
-          }
-        } else if (direction) {
-          // First direction change
-          if (!(newDir.x === -direction.x && newDir.y === -direction.y)) {
-            nextDirection = newDir;
+      // Handle movement keys
+      if (!isPaused && isGameStarted) {
+        // Check which direction group the key belongs to
+        for (const [dirName, keys] of Object.entries(KEY_MAPPINGS)) {
+          if (keys.includes(e.key)) {
+            const newDir = DIRECTIONS[dirName];
+            
+            // Prevent 180-degree turns
+            if (direction && nextDirection) {
+              const currentDir = nextDirection || direction;
+              if (!(newDir.x === -currentDir.x && newDir.y === -currentDir.y)) {
+                nextDirection = newDir;
+              }
+            } else if (direction) {
+              if (!(newDir.x === -direction.x && newDir.y === -direction.y)) {
+                nextDirection = newDir;
+              }
+            }
+            break;  // Exit loop once we've found the matching direction
           }
         }
+      }
+      if (e.key === 'M' || e.key === 'm') {
+        isMuted = !isMuted;
+        Object.values(sounds).forEach(sound => {
+          sound.muted = isMuted;
+        });
       }
     });
 
     // Initial Setup
     ctx.fillStyle = "#fff";
     ctx.fillText("Press Space to Start", canvas.width / 2 - 70, canvas.height / 2);
+
+    // Make sure to show the message when the page loads
+    window.addEventListener('load', () => {
+      showStartMessage();
+    });
   </script>
 </body>
 </html>
