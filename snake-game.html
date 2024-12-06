@@ -58,6 +58,21 @@
     font-size: 24px;
     font-weight: bold;
    }
+   .achievement {
+    position: absolute;
+    top: 150px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(255, 215, 0, 0.9);
+    color: #000;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 20px;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.5s;
+    z-index: 1000;
+  }
     
   </style>
 </head>
@@ -67,7 +82,11 @@
   <div class="high-score">High Score: 0</div>
   <div class="game-over">Game Over! Press Space to Restart.</div>
   <div class="pause-text">PAUSED</div>
+  <div class="achievement"></div>
   <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <audio id="eatSound" src="https://raw.githubusercontent.com/WebDevSimplified/Mix-Or-Match/master/Assets/Audio/flip.wav" preload="auto"></audio>
+  <audio id="bonusSound" src="https://raw.githubusercontent.com/WebDevSimplified/Mix-Or-Match/master/Assets/Audio/match.wav" preload="auto"></audio>
+  <audio id="gameOverSound" src="https://raw.githubusercontent.com/WebDevSimplified/Mix-Or-Match/master/Assets/Audio/gameOver.wav" preload="auto"></audio>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
@@ -76,6 +95,25 @@
     const gridSize = 20; // Size of each square in the grid
     const rows = canvas.height / gridSize;
     const cols = canvas.width / gridSize;
+
+    const achievementElement = document.querySelector('.achievement');
+    const achievements = {
+      firstBonus: false,
+      score50: false,
+      highScoreBeaten: false
+    };
+
+    const sounds = {
+      eat: document.getElementById('eatSound'),
+      bonus: document.getElementById('bonusSound'),
+      gameOver: document.getElementById('gameOverSound')
+    };
+
+    console.log('Sounds loaded:', sounds);
+    Object.values(sounds).forEach(sound => {
+      sound.volume = 0.5; // Set volume to 50%
+      console.log('Sound ready:', sound.readyState);
+    });
 
     const highScoreElement = document.querySelector('.high-score');
     let highScore = parseInt(localStorage.getItem('snakeHighScore')) || 0;
@@ -106,6 +144,16 @@
 
     let isPaused = false;
     let isGameStarted = false;
+
+    function showAchievement(message) {
+      achievementElement.textContent = message;
+      achievementElement.style.opacity = '1';
+
+      // Hide the achievement after 3 seconds
+      setTimeout(() => {
+        achievementElement.style.opacity = '0';
+      }, 3000);
+    }
 
     function resetGame() {
       // Initialize snake with 3 segments in the middle of the screen
@@ -138,6 +186,11 @@
         clearTimeout(bonusFoodTimer);
       }
       bonusFood = null;
+
+      // Reset achievements
+      Object.keys(achievements).forEach(key => {
+        achievements[key] = false;
+      });
     }
 
     function randomDirection() {
@@ -173,6 +226,17 @@
       bonusFoodTimer = setTimeout(() => {
         bonusFood = null;
       }, BONUS_DURATION);
+    }
+
+    function playSound(soundName) {
+      console.log('Attempting to play sound:', soundName);
+      if (!isMuted && sounds[soundName]) {
+        console.log('Sound object:', sounds[soundName]);
+        sounds[soundName].currentTime = 0;
+        sounds[soundName].play()
+          .then(() => console.log('Sound played successfully'))
+          .catch(e => console.log('Sound play failed:', e));
+      }
     }
 
     function drawSnake() {
@@ -326,12 +390,17 @@
         clearInterval(gameInterval);
         gameInterval = null;
         gameOverElement.style.display = 'block';
+        playSound('gameOver');  // Play game over sound
         
         // Update high score only when game ends
         if (score > highScore) {
           highScore = score;
           localStorage.setItem('snakeHighScore', highScore);
           highScoreElement.textContent = `High Score: ${highScore}`;
+          if (!achievements.highScoreBeaten) {
+            achievements.highScoreBeaten = true;
+            showAchievement("New High Score!");
+          }
         }
         return;
       }
@@ -343,10 +412,17 @@
         generateFood();
         score++;
         scoreElement.textContent = "Score: " + score;
+        playSound('eat');  // Play eat sound
         increaseSpeed();
         
         if (Math.random() < BONUS_SPAWN_CHANCE) {
           generateBonusFood();
+        }
+
+        // Add achievement for score 50
+        if (score === 50 && !achievements.score50) {
+          achievements.score50 = true;
+          showAchievement("Score 50!");
         }
       } 
       else if (bonusFood && head.x === bonusFood.x && head.y === bonusFood.y) {
@@ -354,6 +430,14 @@
         bonusFood = null;
         score += BONUS_POINTS;
         scoreElement.textContent = "Score: " + score;
+        playSound('bonus');  // Play bonus sound
+
+
+        // Add achievement for first bonus food
+        if (!achievements.firstBonus) {
+          achievements.firstBonus = true;
+          showAchievement("First Bonus Food Eaten!");
+        }
         
         // Add extra length for bonus food (5 segments)
         for (let i = 0; i < 4; i++) {
@@ -380,8 +464,15 @@
       drawSnake();
     }
 
+    let isMuted = false;
+
     document.addEventListener("keydown", function (e) {
-      if (e.key === " ") {
+      if (e.key === 'M' || e.key === 'm') {
+        isMuted = !isMuted;
+        Object.values(sounds).forEach(sound => {
+          sound.muted = isMuted;
+        });
+      } else if (e.key === " ") {
         if (!isGameStarted || gameOverElement.style.display === 'block') {
           // Start new game or restart after game over
           resetGame();
