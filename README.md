@@ -1,52 +1,80 @@
-# Snake Game
+# Modern Snake Game
 
-This is a simple Snake game implemented using HTML, JavaScript, and CSS. The game runs directly in your browser, and you can control the snake using the `W`, `A`, `S`, and `D` keys. Press the `Spacebar` to start or restart the game.
+A classic Snake game implemented using **HTML**, **CSS**, and **JavaScript**. The game runs directly in your browser, offering a simple and nostalgic experience. Control the snake using the keyboard and grow it by eating food while avoiding collisions.
 
-## How to Run the Game
 
-Follow these steps to run the Snake game:
+## Features
 
-### 1. Save the Code
-1. Open any text editor such as:
-   - Notepad
-   - Visual Studio Code (VSCode)
-   - Sublime Text
-   - Any other text editor of your choice
+### Core Gameplay
+- Smooth snake movement with edge wrapping
+- Progressive difficulty (snake speeds up as you eat)
+- Score tracking and high score persistence
+- Bonus food system with special points
 
-2. Copy the entire code provided in the `snake_game.html` file.
+### Controls
+- **Movement**: WASD keys or Arrow keys
+- **Game Control**: Space bar (Start/Pause/Resume)
+- **Sound**: M key (Mute/Unmute)
 
-3. Paste the code into the text editor.
+### Visual Features
+- Modern gradient background
+- Realistic snake graphics with body segments
+- Particle effects when collecting food
+- Achievement notifications
+- Clean, modern UI with game info panel
 
-4. Save the file with a `.html` extension. You can name it `snake_game.html`.
+### Sound System
+- Food collection sound effects
+- Bonus food sounds
+- Game over sound
+- Mutable audio
 
-### 2. Open the File in a Browser
-1. Navigate to where you saved the `snake_game.html` file on your computer.
+### Additional Features
+- High score system with local storage
+- Achievement system
+- Pause/Resume functionality
+- Responsive design
+- Game over detection
+- Bonus food mechanics
 
-2. Double-click the file to open it. Your default web browser (such as Chrome, Firefox, or Edge) will open the game.
+## How to Play
+1. Press Space to start the game
+2. Use WASD or Arrow keys to control the snake
+3. Collect regular food (white) to grow and increase score
+4. Watch for bonus food (golden) for extra points
+5. Avoid colliding with yourself
+6. Press Space to pause/resume
+7. Press M to toggle sound
 
-### 3. Play the Game
-1. Once the game page loads in the browser, press the `Spacebar` to start the game.
+## Technical Details
+- Built with vanilla JavaScript
+- Uses HTML5 Canvas for rendering
+- Local storage for high score persistence
+- Modern CSS with flexbox layout
+- Responsive design principles
 
-2. Use the following keys to control the snake's direction:
-   - `W`: Move Up
-   - `A`: Move Left
-   - `S`: Move Down
-   - `D`: Move Right
+## Installation
+1. Clone the repository
+2. Open `index.html` in a modern web browser
+3. No additional dependencies required
 
-3. The game ends if the snake hits the walls or itself. After the game ends, press the `Spacebar` to restart.
+## Browser Compatibility
+- Chrome (recommended)
+- Firefox
+- Safari
+- Edge
 
-## Game Features
-- **Dynamic Snake Movement**: The snake moves continuously in a random direction after the game starts. Use the `W`, `A`, `S`, `D` keys to change its direction.
-- **Snake Growth**: The snake grows in length as it eats food.
-- **Game Over Detection**: The game ends when the snake hits a wall or itself.
-- **Press `Spacebar` to Restart**: After a game over, press the `Spacebar` to restart the game.
-- **Large Playground**: The game features an 800x600 pixel playground.
+## Future Improvements
+- Mobile touch controls
+- Multiple difficulty levels
+- Power-ups system
+- Multiplayer mode
+- Custom themes
 
-## Requirements
-- A modern web browser (Chrome, Firefox, Edge, etc.)
-- No external dependencies or assets required
+## Credits
+- Sound effects from [WebDevSimplified](https://github.com/WebDevSimplified)
+- Developed by Neaj Morshad
 
 ## License
-This is a simple open-source project. Feel free to modify, distribute, and use the code for any purpose.
-
+This game is open source and free to use. Feel free to modify, enhance, or share it with others.
 Enjoy the game!
