@@ -71,8 +71,15 @@
     const gameOverElement = document.querySelector('.game-over');
 
     function resetGame() {
-      snake = [{ x: Math.floor(cols / 2), y: Math.floor(rows / 2) }];
-      direction = randomDirection();
+      // Initialize snake with 3 segments in the middle of the screen
+      const startX = Math.floor(cols / 2);
+      const startY = Math.floor(rows / 2);
+      snake = [
+        { x: startX, y: startY },       // Head
+        { x: startX - 1, y: startY },   // Body
+        { x: startX - 2, y: startY }    // Tail
+      ];
+      direction = { x: 1, y: 0 }; // Start moving right
       generateFood();
       score = 0;
       scoreElement.textContent = "Score: 0";
