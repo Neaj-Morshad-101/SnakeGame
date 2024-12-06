@@ -89,6 +89,8 @@
     let bonusFood = null;
     let bonusFoodTimer = null;
 
+    let nextDirection = null;
+
     let snake, direction, food, gameInterval, score;
     let gameSpeed = 100; // Base speed
     const directions = {
@@ -115,6 +117,9 @@
         { x: startX - 2, y: startY } // Tail
       ];
       direction = { x: 1, y: 0 }; // Start moving right
+
+      nextDirection = null;  // Clear any stored next direction
+
       generateFood();
       score = 0;
       scoreElement.textContent = "Score: " + score;
@@ -297,12 +302,27 @@
       }
     }
 
-    function  moveSnake() {
-      const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+    function moveSnake() {
+      // If there's a stored next direction and we're at a grid position
+      if (nextDirection) {
+        direction = nextDirection;
+        nextDirection = null;
+      }
 
-      // Check if snake hits the wall or itself
-      if (head.x < 0 || head.y < 0 || head.x >= cols || head.y >= rows || 
-          snake.some(s => s.x === head.x && s.y === head.y)) {
+      // Calculate new head position with edge wrapping
+      let newX = snake[0].x + direction.x;
+      let newY = snake[0].y + direction.y;
+      
+      // Wrap around edges
+      if (newX >= cols) newX = 0;
+      if (newX < 0) newX = cols - 1;
+      if (newY >= rows) newY = 0;
+      if (newY < 0) newY = rows - 1;
+
+      const head = { x: newX, y: newY };
+
+      // Check only for self collision now (removed wall collision)
+      if (snake.some(s => s.x === head.x && s.y === head.y)) {
         clearInterval(gameInterval);
         gameInterval = null;
         gameOverElement.style.display = 'block';
@@ -318,19 +338,17 @@
 
       snake.unshift(head);
       
-      // Check for food collision
+      // Rest of the function remains the same (food collision checks, etc.)
       if (head.x === food.x && head.y === food.y) {
         generateFood();
         score++;
         scoreElement.textContent = "Score: " + score;
         increaseSpeed();
         
-        // Chance to spawn bonus food
         if (Math.random() < BONUS_SPAWN_CHANCE) {
           generateBonusFood();
         }
       } 
-      // Check for bonus food collision
       else if (bonusFood && head.x === bonusFood.x && head.y === bonusFood.y) {
         clearTimeout(bonusFoodTimer);
         bonusFood = null;
@@ -338,7 +356,7 @@
         scoreElement.textContent = "Score: " + score;
         
         // Add extra length for bonus food (5 segments)
-        for (let i = 0; i < 4; i++) {  // 4 more segments (plus the one we already added)
+        for (let i = 0; i < 4; i++) {
           snake.push({ ...snake[snake.length - 1] });
         }
         
@@ -381,9 +399,23 @@
           }
         }
       }
-      // Only process direction changes if game is running and not paused
+      // Store next direction if it's a valid move
       if (!isPaused && isGameStarted && directions[e.key]) {
-        direction = directions[e.key];
+        const newDir = directions[e.key];
+        
+        // Prevent 180-degree turns
+        if (direction && nextDirection) {
+          // Use nextDirection if it exists, otherwise use current direction
+          const currentDir = nextDirection || direction;
+          if (!(newDir.x === -currentDir.x && newDir.y === -currentDir.y)) {
+            nextDirection = newDir;
+          }
+        } else if (direction) {
+          // First direction change
+          if (!(newDir.x === -direction.x && newDir.y === -direction.y)) {
+            nextDirection = newDir;
+          }
+        }
       }
     });
 
