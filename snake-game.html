@@ -243,32 +243,134 @@
     function drawSnake() {
       // Draw body segments (excluding head and tail)
       for (let i = 1; i < snake.length - 1; i++) {
-        const segment = snake[i];
-        ctx.save();
-        ctx.translate(segment.x * gridSize, segment.y * gridSize);
+        const prev = snake[i - 1];
+        const curr = snake[i];
+        const next = snake[i + 1];
         
-        // Create gradient for each segment
-        const gradient = ctx.createLinearGradient(0, 0, gridSize, 0);
+        ctx.save();
+        ctx.translate(curr.x * gridSize + gridSize/2, curr.y * gridSize + gridSize/2);
+        
+        // Calculate angle based on previous and next segments
+        const angle = Math.atan2(
+          next.y - prev.y,
+          next.x - prev.x
+        );
+        ctx.rotate(angle);
+        
+        // Create gradient for body segment
+        const gradient = ctx.createLinearGradient(0, -gridSize/2, 0, gridSize/2);
         gradient.addColorStop(0, "#00ff44");  // Bright green
-        gradient.addColorStop(1, "#008833");  // Darker green
+        gradient.addColorStop(0.3, "#00cc33"); // Mid green
+        gradient.addColorStop(0.7, "#00aa33"); // Darker green
+        gradient.addColorStop(1, "#008833");   // Darkest green
         ctx.fillStyle = gradient;
         
-        ctx.fillRect(0, 0, gridSize, gridSize);
+        // Main body shape
+        ctx.beginPath();
+        const segmentLength = gridSize;
+        const segmentWidth = gridSize * 0.8;
+        
+        // Draw curved body segment
+        ctx.beginPath();
+        ctx.moveTo(-segmentLength/2, 0);
+        
+        // Top curve
+        ctx.bezierCurveTo(
+          -segmentLength/2, -segmentWidth/2,
+          segmentLength/2, -segmentWidth/2,
+          segmentLength/2, 0
+        );
+        
+        // Bottom curve
+        ctx.bezierCurveTo(
+          segmentLength/2, segmentWidth/2,
+          -segmentLength/2, segmentWidth/2,
+          -segmentLength/2, 0
+        );
+        
+        ctx.fill();
+        
+        // Add scales pattern
+        ctx.fillStyle = "#00cc33";
+        const scaleSize = gridSize/5;
+        const rows = 3;
+        const cols = 4;
+        
+        for(let row = 0; row < rows; row++) {
+          for(let col = 0; col < cols; col++) {
+            const x = (col - cols/2) * scaleSize + (row % 2) * (scaleSize/2);
+            const y = (row - rows/2) * scaleSize;
+            
+            ctx.beginPath();
+            ctx.ellipse(x, y, scaleSize/2, scaleSize/3, 0, 0, Math.PI);
+            ctx.fill();
+          }
+        }
+        
+        // Add highlight for 3D effect
+        const highlightGradient = ctx.createLinearGradient(0, -segmentWidth/2, 0, segmentWidth/4);
+        highlightGradient.addColorStop(0, "rgba(255, 255, 255, 0.3)");
+        highlightGradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+        ctx.fillStyle = highlightGradient;
+        
+        ctx.beginPath();
+        ctx.ellipse(0, -segmentWidth/4, segmentLength/2, segmentWidth/3, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Add shadow for depth
+        const shadowGradient = ctx.createLinearGradient(0, 0, 0, segmentWidth/2);
+        shadowGradient.addColorStop(0, "rgba(0, 0, 0, 0)");
+        shadowGradient.addColorStop(1, "rgba(0, 0, 0, 0.2)");
+        ctx.fillStyle = shadowGradient;
+        
+        ctx.beginPath();
+        ctx.ellipse(0, segmentWidth/4, segmentLength/2, segmentWidth/3, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
         ctx.restore();
       }
 
-      // Draw head with special gradient
+      // Draw muscle definition between segments
+      for (let i = 1; i < snake.length - 1; i++) {
+        const curr = snake[i];
+        const next = snake[i + 1];
+        
+        const midX = (curr.x + next.x) * gridSize/2 + gridSize/2;
+        const midY = (curr.y + next.y) * gridSize/2 + gridSize/2;
+        
+        ctx.save();
+        ctx.translate(midX, midY);
+        
+        const angle = Math.atan2(next.y - curr.y, next.x - curr.x);
+        ctx.rotate(angle);
+        
+        // Muscle definition with better shading
+        const muscleGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, gridSize/3);
+        muscleGradient.addColorStop(0, "rgba(0, 120, 0, 0.3)");
+        muscleGradient.addColorStop(0.5, "rgba(0, 100, 0, 0.2)");
+        muscleGradient.addColorStop(1, "rgba(0, 80, 0, 0)");
+        ctx.fillStyle = muscleGradient;
+        
+        // Draw muscle connection
+        ctx.beginPath();
+        ctx.ellipse(0, 0, gridSize/3, gridSize/4, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.restore();
+      }
+
+      // Draw head
       const head = snake[0];
+      const neck = snake[1];
       ctx.save();
       ctx.translate(head.x * gridSize + gridSize/2, head.y * gridSize + gridSize/2);
       
-      let angle = 0;
-      if (direction.x === 1) angle = 0;
-      if (direction.x === -1) angle = Math.PI;
-      if (direction.y === -1) angle = -Math.PI/2;
-      if (direction.y === 1) angle = Math.PI/2;
-      
-      ctx.rotate(angle);
+      // Calculate head angle based on direction
+      const headAngle = Math.atan2(
+        head.y - neck.y,
+        head.x - neck.x
+      );
+      ctx.rotate(headAngle);
       
       // Head gradient
       const headGradient = ctx.createRadialGradient(0, 0, gridSize/4, 0, 0, gridSize);
@@ -281,7 +383,6 @@
       ctx.arc(-gridSize/4, 0, gridSize/2, -Math.PI/2, Math.PI/2);
       ctx.quadraticCurveTo(gridSize/2, gridSize/2, gridSize/2, 0);
       ctx.quadraticCurveTo(gridSize/2, -gridSize/2, -gridSize/4, -gridSize/2);
-      ctx.closePath();
       ctx.fill();
       
       // Eyes
@@ -289,6 +390,52 @@
       ctx.beginPath();
       ctx.arc(gridSize/6, -gridSize/4, 3, 0, Math.PI * 2);
       ctx.arc(gridSize/6, gridSize/4, 3, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Add tongue
+      ctx.strokeStyle = "#ff3366";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(gridSize/2, 0);
+      const tongueLength = gridSize/2;
+      const tongueTime = Date.now() / 200;
+      const tongueWave = Math.sin(tongueTime) * 2;
+      ctx.lineTo(gridSize/2 + tongueLength * 0.7, tongueWave);
+      ctx.lineTo(gridSize/2 + tongueLength, -tongueWave * 2);
+      ctx.stroke();
+      
+      ctx.restore();
+
+      // Draw tail
+      const tail = snake[snake.length - 1];
+      const beforeTail = snake[snake.length - 2];
+      ctx.save();
+      ctx.translate(tail.x * gridSize + gridSize/2, tail.y * gridSize + gridSize/2);
+      
+      // Calculate tail angle based on direction
+      const tailAngle = Math.atan2(
+        tail.y - beforeTail.y,
+        tail.x - beforeTail.x
+      );
+      ctx.rotate(tailAngle);
+      
+      // Tail gradient
+      const tailGradient = ctx.createLinearGradient(0, -gridSize/2, 0, gridSize/2);
+      tailGradient.addColorStop(0, "#008833");
+      tailGradient.addColorStop(1, "#004422");
+      ctx.fillStyle = tailGradient;
+      
+      // Draw tail shape
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.quadraticCurveTo(
+        -gridSize/2, gridSize/4,
+        -gridSize, 0
+      );
+      ctx.quadraticCurveTo(
+        -gridSize/2, -gridSize/4,
+        0, 0
+      );
       ctx.fill();
       
       ctx.restore();
