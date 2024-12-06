@@ -229,80 +229,36 @@
     }
 
     function playSound(soundName) {
-      console.log('Attempting to play sound:', soundName);
-      if (!isMuted && sounds[soundName]) {
-        console.log('Sound object:', sounds[soundName]);
-        sounds[soundName].currentTime = 0;
-        sounds[soundName].play()
-          .then(() => console.log('Sound played successfully'))
-          .catch(e => console.log('Sound play failed:', e));
-      }
+        try {
+            if (!sounds[soundName]) {
+                throw new Error(`Sound ${soundName} not found`);
+            }
+            sounds[soundName].currentTime = 0;
+            return sounds[soundName].play();
+        } catch (error) {
+            console.error('Sound playback failed:', error);
+        }
     }
 
     function drawSnake() {
-      // Draw body segments (excluding tail and last body segment)
-      ctx.fillStyle = "#0f0";
-      for (let i = 1; i < snake.length - 2; i++) {
-        ctx.fillRect(snake[i].x * gridSize, snake[i].y * gridSize, gridSize, gridSize);
-      }
-
-      // Draw last body segment (tapered)
-      if (snake.length >= 3) {
-        const lastBody = snake[snake.length - 2];
-        const tail = snake[snake.length - 1];
-        ctx.fillStyle = "#0f0";
+      // Draw body segments (excluding head and tail)
+      for (let i = 1; i < snake.length - 1; i++) {
+        const segment = snake[i];
         ctx.save();
-        ctx.translate(lastBody.x * gridSize + gridSize/2, lastBody.y * gridSize + gridSize/2);
+        ctx.translate(segment.x * gridSize, segment.y * gridSize);
         
-        // Calculate direction to tail
-        const dx = tail.x - lastBody.x;
-        const dy = tail.y - lastBody.y;
-        const angle = Math.atan2(dy, dx);
+        // Create gradient for each segment
+        const gradient = ctx.createLinearGradient(0, 0, gridSize, 0);
+        gradient.addColorStop(0, "#00ff44");  // Bright green
+        gradient.addColorStop(1, "#008833");  // Darker green
+        ctx.fillStyle = gradient;
         
-        ctx.rotate(angle);
-        
-        // Draw tapered body segment
-        ctx.beginPath();
-        ctx.moveTo(-gridSize/2, -gridSize/2);  // Top left
-        ctx.lineTo(-gridSize/2, gridSize/2);   // Bottom left
-        ctx.lineTo(gridSize/2, gridSize/3);    // Bottom right (tapered)
-        ctx.lineTo(gridSize/2, -gridSize/3);   // Top right (tapered)
-        ctx.closePath();
-        ctx.fill();
-        
+        ctx.fillRect(0, 0, gridSize, gridSize);
         ctx.restore();
       }
 
-      // Draw tail
-      if (snake.length >= 2) {
-        const tail = snake[snake.length - 1];
-        const beforeTail = snake[snake.length - 2];
-        ctx.fillStyle = "#0f0";
-        ctx.save();
-        ctx.translate(tail.x * gridSize + gridSize/2, tail.y * gridSize + gridSize/2);
-        
-        // Calculate tail direction
-        const dx = beforeTail.x - tail.x;
-        const dy = beforeTail.y - tail.y;
-        const angle = Math.atan2(dy, dx);
-        
-        ctx.rotate(angle);
-        
-        // Draw tapered tail (slightly modified to match last body segment)
-        ctx.beginPath();
-        ctx.moveTo(-gridSize/2, 0);  // Tip of tail
-        ctx.quadraticCurveTo(-gridSize/4, gridSize/3, gridSize/2, gridSize/3);  // Bottom curve
-        ctx.lineTo(gridSize/2, -gridSize/3);  // Straight line
-        ctx.quadraticCurveTo(-gridSize/4, -gridSize/3, -gridSize/2, 0);  // Top curve
-        ctx.closePath();
-        ctx.fill();
-        
-        ctx.restore();
-      }
-
-      // Draw head
+      // Draw head with special gradient
       const head = snake[0];
-      ctx.fillStyle = "#00ff44";
       ctx.save();
       ctx.translate(head.x * gridSize + gridSize/2, head.y * gridSize + gridSize/2);
       
@@ -314,6 +270,13 @@
       
       ctx.rotate(angle);
       
+      // Head gradient
+      const headGradient = ctx.createRadialGradient(0, 0, gridSize/4, 0, 0, gridSize);
+      headGradient.addColorStop(0, "#00ff44");
+      headGradient.addColorStop(1, "#00aa33");
+      ctx.fillStyle = headGradient;
+      
+      // Draw head shape
       ctx.beginPath();
       ctx.arc(-gridSize/4, 0, gridSize/2, -Math.PI/2, Math.PI/2);
       ctx.quadraticCurveTo(gridSize/2, gridSize/2, gridSize/2, 0);
@@ -321,6 +284,7 @@
       ctx.closePath();
       ctx.fill();
       
+      // Eyes
       ctx.fillStyle = "#000";
       ctx.beginPath();
       ctx.arc(gridSize/6, -gridSize/4, 3, 0, Math.PI * 2);
@@ -328,6 +292,47 @@
       ctx.fill();
       
       ctx.restore();
+    }
+
+    // Add particle system
+    const particles = [];
+
+    function Particle(x, y, color) {
+      this.x = x;
+      this.y = y;
+      this.color = color;
+      this.size = Math.random() * 3 + 2;
+      this.speedX = Math.random() * 6 - 3;
+      this.speedY = Math.random() * 6 - 3;
+      this.life = 1.0;  // Full opacity
+    }
+
+    function createParticles(x, y, color = "#ffff00") {
+      for (let i = 0; i < 10; i++) {
+        particles.push(new Particle(x, y, color));
+      }
+    }
+
+    function updateParticles() {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.speedX;
+        p.y += p.speedY;
+        p.life -= 0.02;  // Fade out
+        
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+        }
+      }
+    }
+
+    function drawParticles() {
+      particles.forEach(p => {
+        ctx.fillStyle = p.color + Math.floor(p.life * 255).toString(16).padStart(2, '0');
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
     }
 
     function drawFood() {
@@ -409,6 +414,11 @@
       
       // Rest of the function remains the same (food collision checks, etc.)
       if (head.x === food.x && head.y === food.y) {
+        createParticles(
+          food.x * gridSize + gridSize/2, 
+          food.y * gridSize + gridSize/2,
+          "#ffff00"
+        );
         generateFood();
         score++;
         scoreElement.textContent = "Score: " + score;
@@ -426,6 +436,11 @@
         }
       } 
       else if (bonusFood && head.x === bonusFood.x && head.y === bonusFood.y) {
+        createParticles(
+          bonusFood.x * gridSize + gridSize/2,
+          bonusFood.y * gridSize + gridSize/2,
+          "#ffd700"  // Golden particles for bonus
+        );
         clearTimeout(bonusFoodTimer);
         bonusFood = null;
         score += BONUS_POINTS;
@@ -462,6 +477,12 @@
       moveSnake();
       drawFood();
       drawSnake();
+      if (bonusFood) {
+        drawFood();
+      }
+
+      updateParticles();
+      drawParticles();
     }
 
     let isMuted = false;
