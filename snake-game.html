@@ -359,9 +359,34 @@
         ctx.restore();
       }
 
-      // Draw head
+      // Draw neck connection first
       const head = snake[0];
       const neck = snake[1];
+      
+      // Draw neck connection
+      ctx.save();
+      ctx.translate(
+        (head.x * gridSize + neck.x * gridSize) / 2 + gridSize/2,
+        (head.y * gridSize + neck.y * gridSize) / 2 + gridSize/2
+      );
+      
+      const neckAngle = Math.atan2(head.y - neck.y, head.x - neck.x);
+      ctx.rotate(neckAngle);
+      
+      // Neck gradient
+      const neckGradient = ctx.createLinearGradient(0, -gridSize/2, 0, gridSize/2);
+      neckGradient.addColorStop(0, "#00ff44");
+      neckGradient.addColorStop(0.5, "#00cc33");
+      neckGradient.addColorStop(1, "#00aa33");
+      ctx.fillStyle = neckGradient;
+      
+      // Draw neck connection
+      ctx.beginPath();
+      ctx.ellipse(0, 0, gridSize/1.5, gridSize/2.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.restore();
+
       ctx.save();
       ctx.translate(head.x * gridSize + gridSize/2, head.y * gridSize + gridSize/2);
       
