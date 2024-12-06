@@ -100,10 +100,43 @@
     }
 
     function drawSnake() {
+      // Draw body segments
       ctx.fillStyle = "#0f0";
-      snake.forEach(part => {
-        ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize, gridSize);
-      });
+      for (let i = 1; i < snake.length; i++) {
+        ctx.fillRect(snake[i].x * gridSize, snake[i].y * gridSize, gridSize, gridSize);
+      }
+
+      // Draw head
+      const head = snake[0];
+      ctx.fillStyle = "#00ff44"; // Slightly different green for the head
+      ctx.save();
+      ctx.translate(head.x * gridSize + gridSize/2, head.y * gridSize + gridSize/2);
+      
+      // Determine rotation based on direction
+      let angle = 0;
+      if (direction.x === 1) angle = 0;
+      if (direction.x === -1) angle = Math.PI;
+      if (direction.y === -1) angle = -Math.PI/2;
+      if (direction.y === 1) angle = Math.PI/2;
+      
+      ctx.rotate(angle);
+      
+      // Draw rounded head shape (fixed orientation)
+      ctx.beginPath();
+      ctx.arc(-gridSize/4, 0, gridSize/2, -Math.PI/2, Math.PI/2); // Front semi-circle
+      ctx.quadraticCurveTo(gridSize/2, gridSize/2, gridSize/2, 0); // Bottom curve
+      ctx.quadraticCurveTo(gridSize/2, -gridSize/2, -gridSize/4, -gridSize/2); // Top curve
+      ctx.closePath();
+      ctx.fill();
+      
+      // Add eyes (moved to the front)
+      ctx.fillStyle = "#000";
+      ctx.beginPath();
+      ctx.arc(gridSize/6, -gridSize/4, 3, 0, Math.PI * 2);
+      ctx.arc(gridSize/6, gridSize/4, 3, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.restore();
     }
 
     function drawFood() {
