@@ -73,7 +73,7 @@ A classic Snake game implemented using **HTML**, **CSS**, and **JavaScript**. Th
 
 ## Credits
 - Sound effects from [WebDevSimplified](https://github.com/WebDevSimplified)
-- Developed by Neaj Morshad
+- Developed by [Neaj Morshad](https://github.com/Neaj-Morshad-101)
 
 ## License
 This game is open source and free to use. Feel free to modify, enhance, or share it with others.
