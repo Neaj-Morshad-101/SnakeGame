@@ -42,12 +42,22 @@
       font-weight: bold;
       display: none;
     }
+    .pause-text {
+      position: absolute;
+      top: 100px; /* Position below score and info */
+      color: yellow;
+      font-size: 24px;
+      font-weight: bold;
+      display: none;
+    }
+    
   </style>
 </head>
 <body>
   <div class="info">Press Space to Start/Restart. Use 'W', 'A', 'S', 'D' to move the snake.</div>
   <div class="score">Score: 0</div>
   <div class="game-over">Game Over! Press Space to Restart.</div>
+  <div class="pause-text">PAUSED</div>
   <canvas id="gameCanvas" width="800" height="600"></canvas>
 
   <script>
@@ -69,22 +79,34 @@
 
     const scoreElement = document.querySelector('.score');
     const gameOverElement = document.querySelector('.game-over');
+    const pauseElement = document.querySelector('.pause-text');
+
+    let isPaused = false;
+    let isGameStarted = false;
 
     function resetGame() {
       // Initialize snake with 3 segments in the middle of the screen
       const startX = Math.floor(cols / 2);
       const startY = Math.floor(rows / 2);
       snake = [
-        { x: startX, y: startY },       // Head
-        { x: startX - 1, y: startY },   // Body
-        { x: startX - 2, y: startY }    // Tail
+        { x: startX, y: startY }, // Head
+        { x: startX - 1, y: startY }, // Body
+        { x: startX - 2, y: startY } // Tail
       ];
       direction = { x: 1, y: 0 }; // Start moving right
       generateFood();
       score = 0;
-      scoreElement.textContent = "Score: 0";
+      scoreElement.textContent = "Score: " + score;
       gameSpeed = 100;
       gameOverElement.style.display = 'none';
+      pauseElement.style.display = 'none';
+      isPaused = false;
+      isGameStarted = true;
+      // Clear existing interval if any
+      if (gameInterval) {
+        clearInterval(gameInterval);
+        gameInterval = null;
+      }
     }
 
     function randomDirection() {
@@ -232,12 +254,26 @@
     }
 
     document.addEventListener("keydown", function (e) {
-      if (e.key === " " && !gameInterval) {
-        resetGame();
-        gameInterval = setInterval(gameLoop, gameSpeed);
+      if (e.key === " ") {
+        if (!isGameStarted || gameOverElement.style.display === 'block') {
+          // Start new game or restart after game over
+          resetGame();
+          gameInterval = setInterval(gameLoop, gameSpeed);
+          isGameStarted = true;
+        } else {
+          // Toggle pause if game is in progress
+          isPaused = !isPaused;
+          pauseElement.style.display = isPaused ? 'block' : 'none';
+          if (isPaused) {
+            clearInterval(gameInterval);
+            gameInterval = null;
+          } else {
+            gameInterval = setInterval(gameLoop, gameSpeed);
+          }
+        }
       }
-
-      if (directions[e.key]) {
+      // Only process direction changes if game is running and not paused
+      if (!isPaused && isGameStarted && directions[e.key]) {
         direction = directions[e.key];
       }
     });
