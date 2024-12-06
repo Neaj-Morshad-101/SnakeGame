@@ -381,12 +381,6 @@
       gameOver: document.getElementById('gameOverSound')
     };
 
-    console.log('Sounds loaded:', sounds);
-    Object.values(sounds).forEach(sound => {
-      sound.volume = 0.5; // Set volume to 50%
-      console.log('Sound ready:', sound.readyState);
-    });
-
     const highScoreElement = document.querySelector('.high-score');
     let highScore = parseInt(localStorage.getItem('snakeHighScore')) || 0;
     highScoreElement.textContent = `High Score: ${highScore}`;
@@ -403,12 +397,6 @@
 
     let snake, direction, food, gameInterval, score;
     let gameSpeed = 100; // Base speed
-    const directions = {
-      'w': { x: 0, y: -1 },
-      's': { x: 0, y: 1 },
-      'a': { x: -1, y: 0 },
-      'd': { x: 1, y: 0 }
-    };
 
     const scoreElement = document.querySelector('.score');
     const gameOverElement = document.querySelector('.game-over');
@@ -471,11 +459,6 @@
       if (!isGameStarted) {
         showStartMessage();
       }
-    }
-
-    function randomDirection() {
-      const keys = Object.keys(directions);
-      return directions[keys[Math.floor(Math.random() * keys.length)]];
     }
 
     function generateFood() {
@@ -1027,10 +1010,6 @@
         });
       }
     });
-
-    // Initial Setup
-    ctx.fillStyle = "#fff";
-    ctx.fillText("Press Space to Start", canvas.width / 2 - 70, canvas.height / 2);
 
     // Make sure to show the message when the page loads
     window.addEventListener('load', () => {
