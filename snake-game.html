@@ -100,19 +100,72 @@
     }
 
     function drawSnake() {
-      // Draw body segments
+      // Draw body segments (excluding tail and last body segment)
       ctx.fillStyle = "#0f0";
-      for (let i = 1; i < snake.length; i++) {
+      for (let i = 1; i < snake.length - 2; i++) {
         ctx.fillRect(snake[i].x * gridSize, snake[i].y * gridSize, gridSize, gridSize);
+      }
+
+      // Draw last body segment (tapered)
+      if (snake.length >= 3) {
+        const lastBody = snake[snake.length - 2];
+        const tail = snake[snake.length - 1];
+        ctx.fillStyle = "#0f0";
+        ctx.save();
+        ctx.translate(lastBody.x * gridSize + gridSize/2, lastBody.y * gridSize + gridSize/2);
+        
+        // Calculate direction to tail
+        const dx = tail.x - lastBody.x;
+        const dy = tail.y - lastBody.y;
+        const angle = Math.atan2(dy, dx);
+        
+        ctx.rotate(angle);
+        
+        // Draw tapered body segment
+        ctx.beginPath();
+        ctx.moveTo(-gridSize/2, -gridSize/2);  // Top left
+        ctx.lineTo(-gridSize/2, gridSize/2);   // Bottom left
+        ctx.lineTo(gridSize/2, gridSize/3);    // Bottom right (tapered)
+        ctx.lineTo(gridSize/2, -gridSize/3);   // Top right (tapered)
+        ctx.closePath();
+        ctx.fill();
+        
+        ctx.restore();
+      }
+
+      // Draw tail
+      if (snake.length >= 2) {
+        const tail = snake[snake.length - 1];
+        const beforeTail = snake[snake.length - 2];
+        ctx.fillStyle = "#0f0";
+        ctx.save();
+        ctx.translate(tail.x * gridSize + gridSize/2, tail.y * gridSize + gridSize/2);
+        
+        // Calculate tail direction
+        const dx = beforeTail.x - tail.x;
+        const dy = beforeTail.y - tail.y;
+        const angle = Math.atan2(dy, dx);
+        
+        ctx.rotate(angle);
+        
+        // Draw tapered tail (slightly modified to match last body segment)
+        ctx.beginPath();
+        ctx.moveTo(-gridSize/2, 0);  // Tip of tail
+        ctx.quadraticCurveTo(-gridSize/4, gridSize/3, gridSize/2, gridSize/3);  // Bottom curve
+        ctx.lineTo(gridSize/2, -gridSize/3);  // Straight line
+        ctx.quadraticCurveTo(-gridSize/4, -gridSize/3, -gridSize/2, 0);  // Top curve
+        ctx.closePath();
+        ctx.fill();
+        
+        ctx.restore();
       }
 
       // Draw head
       const head = snake[0];
-      ctx.fillStyle = "#00ff44"; // Slightly different green for the head
+      ctx.fillStyle = "#00ff44";
       ctx.save();
       ctx.translate(head.x * gridSize + gridSize/2, head.y * gridSize + gridSize/2);
       
-      // Determine rotation based on direction
       let angle = 0;
       if (direction.x === 1) angle = 0;
       if (direction.x === -1) angle = Math.PI;
@@ -121,15 +174,13 @@
       
       ctx.rotate(angle);
       
-      // Draw rounded head shape (fixed orientation)
       ctx.beginPath();
-      ctx.arc(-gridSize/4, 0, gridSize/2, -Math.PI/2, Math.PI/2); // Front semi-circle
-      ctx.quadraticCurveTo(gridSize/2, gridSize/2, gridSize/2, 0); // Bottom curve
-      ctx.quadraticCurveTo(gridSize/2, -gridSize/2, -gridSize/4, -gridSize/2); // Top curve
+      ctx.arc(-gridSize/4, 0, gridSize/2, -Math.PI/2, Math.PI/2);
+      ctx.quadraticCurveTo(gridSize/2, gridSize/2, gridSize/2, 0);
+      ctx.quadraticCurveTo(gridSize/2, -gridSize/2, -gridSize/4, -gridSize/2);
       ctx.closePath();
       ctx.fill();
       
-      // Add eyes (moved to the front)
       ctx.fillStyle = "#000";
       ctx.beginPath();
       ctx.arc(gridSize/6, -gridSize/4, 3, 0, Math.PI * 2);
