@@ -8,21 +8,33 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       min-height: 100vh;
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
       overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
   
-    /* Game container */
+    /* Game container with flex layout */
     .game-container {
-      position: relative;
+      display: flex;
+      gap: 20px;  /* Space between game and UI */
+      align-items: flex-start;
       padding: 20px;
-      border-radius: 15px;
-      background: rgba(0, 0, 0, 0.2);
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    }
+  
+    /* Left side - Game info */
+    .game-info {
+      width: 200px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+  
+    /* Right side - Canvas */
+    .game-area {
+      position: relative;
     }
   
     canvas {
@@ -35,40 +47,25 @@
       transition: all 0.3s ease;
     }
   
-    /* UI Elements with modern styling */
-    .info {
-      position: absolute;
-      top: 20px;
+    /* UI Elements */
+    .info, .score, .high-score {
       color: rgba(255, 255, 255, 0.9);
-      font-size: 18px;
-      font-weight: 500;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
       background: rgba(0, 0, 0, 0.2);
-      padding: 10px 20px;
+      padding: 15px;
       border-radius: 8px;
       backdrop-filter: blur(5px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+  
+    .info {
+      font-size: 16px;
+      line-height: 1.4;
     }
   
     .score, .high-score {
-      position: absolute;
-      color: rgba(255, 255, 255, 0.9);
       font-size: 24px;
       font-weight: bold;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-      background: rgba(0, 0, 0, 0.2);
-      padding: 10px 20px;
-      border-radius: 8px;
-      backdrop-filter: blur(5px);
-      transition: all 0.3s ease;
-    }
-  
-    .score {
-      top: 60px;
-    }
-  
-    .high-score {
-      top: 60px;
-      right: 20px;
+      text-align: center;
     }
   
     .game-over {
@@ -79,9 +76,7 @@
       color: #ff3333;
       font-size: 36px;
       font-weight: bold;
-      text-shadow: 
-        0 0 10px rgba(255, 51, 51, 0.5),
-        0 2px 4px rgba(0, 0, 0, 0.5);
+      text-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
       display: none;
       background: rgba(0, 0, 0, 0.8);
       padding: 20px 40px;
@@ -91,13 +86,13 @@
   
     .pause-text {
       position: absolute;
-      top: 100px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       color: #ffdd00;
       font-size: 24px;
       font-weight: bold;
-      text-shadow: 
-        0 0 10px rgba(255, 221, 0, 0.5),
-        0 2px 4px rgba(0, 0, 0, 0.5);
+      text-shadow: 0 0 10px rgba(255, 221, 0, 0.5);
       display: none;
       background: rgba(0, 0, 0, 0.8);
       padding: 10px 20px;
@@ -107,7 +102,7 @@
   
     .achievement {
       position: absolute;
-      top: 150px;
+      top: 20px;
       left: 50%;
       transform: translateX(-50%);
       background: linear-gradient(135deg, #ffd700, #ffa500);
@@ -118,20 +113,10 @@
       font-weight: bold;
       opacity: 0;
       transition: all 0.5s ease;
-      box-shadow: 
-        0 4px 15px rgba(255, 215, 0, 0.3),
-        0 0 30px rgba(255, 215, 0, 0.1);
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
       z-index: 1000;
     }
   
-    /* Hover effects */
-    canvas:hover {
-      box-shadow: 
-        0 0 25px rgba(0, 0, 0, 0.7),
-        inset 0 0 35px rgba(0, 0, 0, 0.6);
-    }
-  
-    /* Animation for score changes */
     @keyframes scoreUpdate {
       0% { transform: scale(1); }
       50% { transform: scale(1.1); }
@@ -144,15 +129,22 @@
   </style>
 </head>
 <body>
-  <div class="game-container">
+<div class="game-container">
+  <!-- Left side - Game info -->
+  <div class="game-info">
     <div class="info">Press Space to Start/Restart. Use 'W', 'A', 'S', 'D' to move the snake.</div>
     <div class="score">Score: 0</div>
     <div class="high-score">High Score: 0</div>
+  </div>
+  
+  <!-- Right side - Game area -->
+  <div class="game-area">
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
     <div class="game-over">Game Over! Press Space to Restart.</div>
     <div class="pause-text">PAUSED</div>
     <div class="achievement"></div>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
   </div>
+</div>
   <audio id="eatSound" src="https://raw.githubusercontent.com/WebDevSimplified/Mix-Or-Match/master/Assets/Audio/flip.wav" preload="auto"></audio>
   <audio id="bonusSound" src="https://raw.githubusercontent.com/WebDevSimplified/Mix-Or-Match/master/Assets/Audio/match.wav" preload="auto"></audio>
   <audio id="gameOverSound" src="https://raw.githubusercontent.com/WebDevSimplified/Mix-Or-Match/master/Assets/Audio/gameOver.wav" preload="auto"></audio>
