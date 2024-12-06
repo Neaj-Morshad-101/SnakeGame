@@ -55,7 +55,7 @@ A classic Snake game implemented using **HTML**, **CSS**, and **JavaScript**. Th
 
 ## Installation
 1. Clone the repository
-2. Open `index.html` in a modern web browser
+2. Open `snake-game.html` in a modern web browser
 3. No additional dependencies required
 
 ## Browser Compatibility
