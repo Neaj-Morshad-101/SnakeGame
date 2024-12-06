@@ -50,12 +50,21 @@
       font-weight: bold;
       display: none;
     }
+    .high-score {
+    position: absolute;
+    top: 60px;
+    right: 20px;  /* Position on the right side */
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+   }
     
   </style>
 </head>
 <body>
   <div class="info">Press Space to Start/Restart. Use 'W', 'A', 'S', 'D' to move the snake.</div>
   <div class="score">Score: 0</div>
+  <div class="high-score">High Score: 0</div>
   <div class="game-over">Game Over! Press Space to Restart.</div>
   <div class="pause-text">PAUSED</div>
   <canvas id="gameCanvas" width="800" height="600"></canvas>
@@ -67,6 +76,11 @@
     const gridSize = 20; // Size of each square in the grid
     const rows = canvas.height / gridSize;
     const cols = canvas.width / gridSize;
+
+    const highScoreElement = document.querySelector('.high-score');
+    let highScore = parseInt(localStorage.getItem('snakeHighScore')) || 0;
+    highScoreElement.textContent = `High Score: ${highScore}`;
+
    
     const BONUS_DURATION = 5000; // Bonus food stays for 5 seconds
     const BONUS_POINTS = 5;
@@ -292,6 +306,13 @@
         clearInterval(gameInterval);
         gameInterval = null;
         gameOverElement.style.display = 'block';
+        
+        // Update high score only when game ends
+        if (score > highScore) {
+          highScore = score;
+          localStorage.setItem('snakeHighScore', highScore);
+          highScoreElement.textContent = `High Score: ${highScore}`;
+        }
         return;
       }
 
