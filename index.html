@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neaj's Snake Game</title>
+    
+    <!-- CSS files -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/game-ui.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Game Info Panel -->
+        <div class="game-info">
+            <!-- Controls Section -->
+            <div class="info">
+                <h2>Game Controls</h2>
+                <div class="controls-list">
+                    <div class="control-item">
+                        <div class="control-label">Movement:</div>
+                        <div class="key-groups">
+                            <div class="key-set">
+                                <div class="key">W</div>
+                                <div class="key-row">
+                                    <div class="key">A</div>
+                                    <div class="key">S</div>
+                                    <div class="key">D</div>
+                                </div>
+                            </div>
+                            <span class="or">or</span>
+                            <div class="key-set">
+                                <div class="key">↑</div>
+                                <div class="key-row">
+                                    <div class="key">←</div>
+                                    <div class="key">↓</div>
+                                    <div class="key">→</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-item">
+                        <div class="control-label">Game Control:</div>
+                        <div class="key-groups">
+                            <div class="key long">Space</div>
+                            <span class="key-action">Start / Pause / Resume</span>
+                        </div>
+                    </div>
+                    <div class="control-item">
+                        <div class="control-label">Sound:</div>
+                        <div class="key-groups">
+                            <div class="key">M</div>
+                            <span class="key-action">Mute / Unmute</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Score Display -->
+            <div class="score">Score: 0</div>
+            <div class="high-score">High Score: 0</div>
+        </div>
+
+        <!-- Game Area -->
+        <div class="game-area">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <div class="start-message">Press Space to Start</div>
+            <div class="game-over">Game Over! Press Space to Restart</div>
+            <div class="pause-text">PAUSED</div>
+            <div class="achievement"></div>
+        </div>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="eatSound" src="assets/sounds/eat.wav" preload="auto"></audio>
+    <audio id="bonusSound" src="assets/sounds/bonus.wav" preload="auto"></audio>
+    <audio id="gameOverSound" src="assets/sounds/gameOver.wav" preload="auto"></audio>
+
+    <!-- JavaScript Files (in correct order) -->
+    <script src="js/sound.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/food.js"></script>
+    <script src="js/snake.js"></script>
+    <script src="js/controls.js"></script>
+    <script src="js/achievements.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html> 
